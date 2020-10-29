@@ -91,7 +91,7 @@ void setup() {
   display.display();
 
 
-  Serial.println(F("BLE Temperature Sensor Peripheral"));
+  Serial.println(F("started"));
 }
 
 void loop() {
