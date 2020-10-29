@@ -10,25 +10,23 @@
 #define BLE_RDY   2
 #define BLE_RST   9
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define OLED_RESET    -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_WIDTH 128 // display width
+#define SCREEN_HEIGHT 64 // display height
+#define OLED_RESET    -1 // reset pin 
 
+// setup bluetooth and peripherals
 BLEPeripheral blePeripheral = BLEPeripheral(BLE_REQ, BLE_RDY, BLE_RST);
 
 BLEService tempService = BLEService("CCC0");
 BLEFloatCharacteristic tempCharacteristic = BLEFloatCharacteristic("CCC1", BLERead | BLENotify);
 BLEDescriptor tempDescriptor = BLEDescriptor("2901", "Temp in Celsius");
 
-BLEService testService = BLEService("CC25");
-BLEFloatCharacteristic testCharacteristic = BLEFloatCharacteristic("CC32", BLERead | BLENotify);
-BLEDescriptor testDescriptor = BLEDescriptor("2765", "Test");
-
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); //Declaring the display name (display)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); 
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
 float lastTempReading;
 
+// event handlers for connect / disconnect
 void blePeripheralConnectHandler(BLECentral& central) {
   Serial.print(F("Connected event, central: "));
   Serial.println(central.address());
@@ -39,6 +37,7 @@ void blePeripheralDisconnectHandler(BLECentral& central) {
   Serial.println(central.address());
 }
 
+// display code
 void displayTemp() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -55,30 +54,25 @@ void displayTemp() {
   display.display();
 }
 
-void displayTestText() {
-    display.setTextSize(1);
-  display.setCursor(0, 50);
-  display.println("test text123456");
-}
+// void displayTestText() {
+   // display.setTextSize(1);
+ // display.setCursor(0, 50);
+ // display.println("test text123456");
+// }
 
 void setTempCharacteristicValue() {
   float reading = (mlx.readObjectTempC(), 1);
-  //  float reading = random(100);
+  //  float reading = random(10);
   tempCharacteristic.setValue(reading);
-  Serial.print(F("Temperature: ")); Serial.print(reading); Serial.println(F("C"));
+  Serial.print(reading);
+  Serial.println(F("C"));
   lastTempReading = reading;
-}
-
-void setTestCharacteristic() {
-  testCharacteristic.setValue(11);
 }
 
 void setup() {
   Serial.begin(115200);
-#if defined (__AVR_ATmega32U4__)
-  delay(5000);  //5 seconds delay for enabling to see the start up comments on the serial board
-#endif
-
+  
+  // init temperature service
   blePeripheral.setLocalName("Temperature");
 
   blePeripheral.setAdvertisedServiceUuid(tempService.uuid());
@@ -91,9 +85,9 @@ void setup() {
 
   blePeripheral.begin();
 
-  mlx.begin();
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
-  display.clearDisplay();
+  mlx.begin(); // init sensor
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // start the display
+  display.clearDisplay(); // clear display buffer
   display.display();
 
 
@@ -103,8 +97,7 @@ void setup() {
 void loop() {
   blePeripheral.poll();
   setTempCharacteristicValue();
-  setTestCharacteristic();
   displayTemp();
-  displayTestText();
+  // displayTestText();
   delay(500);
 }
