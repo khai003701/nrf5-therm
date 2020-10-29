@@ -55,7 +55,7 @@ void displayTemp() {
 }
 
 // void displayTestText() {
-   // display.setTextSize(1);
+ // display.setTextSize(1);
  // display.setCursor(0, 50);
  // display.println("test text123456");
 // }
